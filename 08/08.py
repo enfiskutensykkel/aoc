@@ -47,7 +47,7 @@ screen = []
 for y in xrange(H):
     line = []
     for x in xrange(W):
-        line.append('.')
+        line.append(' ')
     screen.append(line)
 
 for line in open(inputfile).readlines():
@@ -70,9 +70,8 @@ for line in open(inputfile).readlines():
         elif what == 'column':
             rotate_col(screen, pos, by)
 
-    print line.strip()
-    printscreen(screen)
+    #printscreen(screen)
 
 
-#printscreen(screen)
+printscreen(screen)
 print sum(map(lambda x: x == '#', [x for y in screen for x in y]))
