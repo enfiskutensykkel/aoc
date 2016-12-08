@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 import re
 
-W = 7
-H = 3
-inputfile = 'test'
-#W = 50
-#H = 6
-#inputfile = 'input'
+#W = 7
+#H = 3
+#inputfile = 'test'
+W = 50
+H = 6
+inputfile = 'input'
 
 def rect(screen, x, y):
     for j in xrange(y):
@@ -70,6 +70,7 @@ for line in open(inputfile).readlines():
         elif what == 'column':
             rotate_col(screen, pos, by)
 
+    print line.strip()
     printscreen(screen)
 
 
