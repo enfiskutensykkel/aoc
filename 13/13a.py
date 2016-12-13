@@ -77,4 +77,5 @@ def uniform_cost_search(start, goal, constant):
                 elif contains(frontier, neighbour, cost+1):
                     replace(frontier, neighbour, cost+1)
 
+
 print uniform_cost_search((1,1), (31,39), 1352)
