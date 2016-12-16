@@ -16,7 +16,8 @@ def checksum(data):
     return data
 
 
-target = 272
+#target = 272
+target = 35651584
 data = "10010000000110000"
 
 while len(data) < target:
