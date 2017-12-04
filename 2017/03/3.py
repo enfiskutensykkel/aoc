@@ -44,16 +44,7 @@ def position(n):
     return 0, 0
 
 
-def generate_ring(x):
-    if x == 0:
-        return [1]
-
-    return range(ring(x - 1) + 1, ring(x) + 1)
-
-
 spiral = {}
-spiral[(0, 0)] = 1
-
 for i, v in enumerate([1, 1, 2, 4, 5, 10, 11, 23, 25]):
     y, x = position(i + 1)
     spiral[(x, y)] = v
