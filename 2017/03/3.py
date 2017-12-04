@@ -54,12 +54,8 @@ def generate_ring(x):
 spiral = {}
 spiral[(0, 0)] = 1
 
-cells = {}
 for i, v in enumerate([1, 1, 2, 4, 5, 10, 11, 23, 25]):
-    cells[i+1] = v
-
-for k, v in cells.iteritems():
-    y, x = position(k)
+    y, x = position(i + 1)
     spiral[(x, y)] = v
 
 
