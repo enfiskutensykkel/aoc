@@ -33,33 +33,30 @@ class Program(object):
         return weight
 
     def balanced(self):
-        if len(self.parents) == 0:
-            return self.weight
-
-        weights = {}
-        for p in self.parents:
-            weights[p] = p.balanced()
-
         maxp = None
+        maxw = 0
         minp = None
-        for p, a in weights.iteritems():
-            if maxp is None:
+        minw = 0
+
+        for p in self.parents:
+            w = p.accumulate()
+
+            if maxp is None or w > maxw:
                 maxp = p
-            if minp is None:
+                maxw = w
+
+            if minp is None or w < minw:
                 minp = p
+                minw = w
 
-            if weights[p] < weights[minp]:
-                minp = p
-            elif weights[p] > weights[maxp]:
-                maxp = p
+        if minw != maxw:
+            unbalanced, diff = minp.balanced()
+            if unbalanced != minp:
+                return unbalanced, unbalanced.weight + (maxw - minw)
+            unbalanced, diff = maxp.balanced()
+            return unbalanced, unbalanced.weight - (maxw - minw)
 
-        diff = weights[maxp] - weights[minp]
-        if diff != 0:
-            print maxp, weights[maxp], weights[maxp] - diff, maxp.weight, maxp.weight - diff
-            #print minp, minp.weight, minp.weight + diff
-
-        return self.weight + sum(weights.values())
-
+        return self, 0
 
 
 node_expr = re.compile(r'(?P<name>\w+)\s\((?P<weight>\d+)\)')
@@ -106,5 +103,5 @@ for program, count in counts.iteritems():
 
 print most
 
-most.balanced()
+print most.balanced()
 
