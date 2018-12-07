@@ -2,19 +2,15 @@
 
 import re
 
-instructions = """Step C must be finished before step A can begin.
-Step C must be finished before step F can begin.
-Step A must be finished before step B can begin.
-Step A must be finished before step D can begin.
-Step B must be finished before step E can begin.
-Step D must be finished before step E can begin.
-Step F must be finished before step E can begin."""
+#instructions = """Step C must be finished before step A can begin.
+#Step C must be finished before step F can begin.
+#Step A must be finished before step B can begin.
+#Step A must be finished before step D can begin.
+#Step B must be finished before step E can begin.
+#Step D must be finished before step E can begin.
+#Step F must be finished before step E can begin."""
 
-
-def clear(deps, s):
-    for dep in deps:
-        if s in deps[dep]:
-            deps[dep].remove(s)
+instructions = open('input').read()
 
 steps = set()
 deps = {}
@@ -34,9 +30,9 @@ while len(steps) > 0:
             steps.remove(step)
             break
 
-    print steps
-
     string += step
-    clear(deps, step)
+    for dep in deps:
+        if step in deps[dep]:
+            deps[dep].remove(step)
 
 print string
