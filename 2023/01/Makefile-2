@@ -1,0 +1,35 @@
+zero := 0
+one := 1
+two := 2
+three := 3
+four := 4
+five := 5
+six := 6
+seven := 7
+eight := 8
+nine := 9
+
+space = $(strip) $(strip)#
+mapped = zero one two three four five six seven eight nine
+digits = $(mapped) 0 1 2 3 4 5 6 7 8 9
+
+slice = $(wordlist 2,$(words $1),$1)
+map = $(if $2,$(call map,$1,$(call slice,$2),$3,$4 $(call $1,$(firstword $2),$3,$4)),$4)
+
+eq = $(filter $1,$2)
+mark = $(sort $(foreach p,$(foreach f,$(digits),$(findstring $f,$1)),$(subst $p,-$p-,$1)))
+first_and_last = $(firstword $1) $(lastword $1)
+convert = $(if $(findstring $1,$(mapped)),$(value $1),$1)
+extract_digits = $(call convert,$(firstword $(filter $(digits),$(subst -, ,$1))))
+implode = $(subst $(space),,$(strip $1))
+
+repeat = $(if $(call eq,$(words $3),$1),$(strip $3),$(call repeat,$1,$2,$3 $2))
+
+calibvalue = $(call repeat,$(call implode,$(call map,extract_digits,$(call first_and_last,$(call mark,$1)))),_)
+
+FILENAME ?= input.txt
+LINES = $(file < $(FILENAME))
+result := $(words $(call map,calibvalue,$(LINES)))
+
+.PHONY: all
+all: ; $(info $(result))
