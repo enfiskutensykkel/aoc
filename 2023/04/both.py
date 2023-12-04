@@ -12,21 +12,35 @@ Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11
 
 expr = re.compile(r'(\d+)')
 
-total = 0
+cards = {}
+
+def add_card(card, instances):
+    if card not in cards:
+        cards[card] = instances
+    else:
+        cards[card] += instances
+
+total_points = 0
 
 #for line in test.strip().split("\n"):
 for line in open("input.txt").readlines():
     card, winning, numbers = re.split(r"[:|]", line)
-    winning = sorted([int(i) for i in expr.findall(winning)])
-    numbers = sorted([int(i) for i in expr.findall(numbers)])
+    card = int(expr.search(card).group(0))
+    winning = expr.findall(winning)
+    numbers = expr.findall(numbers)
+
+    add_card(card, 1)
+    instances = cards[card]
 
     num_winning = 0
     for mynum in numbers:
         for winnum in winning:
             if winnum == mynum:
                 num_winning += 1
+                add_card((card + num_winning), instances)
 
     points = (1 << (num_winning - 1)) if num_winning > 0 else 0
-    total += points
+    total_points += points
 
-print(total)
+print(total_points)
+print(sum(cards.values()))
