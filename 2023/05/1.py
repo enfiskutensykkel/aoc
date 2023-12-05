@@ -10,8 +10,6 @@ seeds = [int(x) for x in re.findall(r"\d+", groups[0])]
 
 for group in groups[1:]:
     lines = group.split("\n")
-    src, dst = re.search("^([^\-]+)-to-([^\s]+) map:$", lines[0]).groups()
-
     mapped = []
     for seed in seeds:
         for line in lines[1:]:
