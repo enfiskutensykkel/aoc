@@ -1,27 +1,29 @@
 #!/usr/bin/env python3
 import re
 import sys
+import bisect
 
 input_data = sys.stdin.read()
 
 groups = input_data.strip().split("\n\n")
 
 class SeedRange:
-    def __init__(self, start, end, src=None, dst=None):
+    def __init__(self, start, end):
         self.start = start
         self.end = end
-        self.length = end - start
+
+    @property
+    def length(self):
+        return self.end - self.start
 
     def overlaps(self, other):
-        if self.start <= other.start and other.start < self.end:
-            return True
-        if self.start < other.end and other.end <= self.end:
-            return True
-        if other.start <= self.start and self.start < other.end:
-            return True
-        if other.start < self.end and self.end <= other.end:
-            return True
-        return False
+        return (self.start <= other.start < self.end) or (other.start <= self.start < other.end)
+
+    def __lt__(self, other):
+        return self.start < other.start or self.end < other.end
+
+    def __eq__(self, other):
+        return self.start == other.start and self.end == other.end
 
     def split(self, other):
         if self.start >= other.start and self.end <= other.end:
@@ -46,39 +48,66 @@ class SeedRange:
 
         raise Exception("this should not happen")
 
-seed_ranges = [SeedRange(int(x), int(x)+int(y)) for x, y in re.findall(r"(\d+)\s(\d+)", groups[0])]
+
+seed_ranges = sorted([SeedRange(int(x), int(x)+int(y)) for x, y in re.findall(r"(\d+)\s(\d+)", groups[0])])
 
 for group in groups[1:]:
     lines = group.split("\n")[1:]
 
-    queue = [sr for sr in seed_ranges]
     mapped = []
 
-    while len(queue) > 0:
-        seedrange = queue.pop(0)
+    mappings = [tuple(int(x) for x in re.findall("\d+", line))
+                for line in lines]
+    mapping_objs = sorted([(dst, SeedRange(src, src+length))
+                          for dst, src, length in mappings],
+                          key=lambda x: x[1])
 
-        for line in lines:
-            dst, src, length = (int(x) for x in re.findall("\d+", line))
-            maprange = SeedRange(src, src+length)
+    first, last = mapping_objs[0][1], mapping_objs[-1][1]
+
+    while len(seed_ranges) > 0:
+        seedrange = seed_ranges.pop(0)
+
+        if seedrange.end <= first.start or seedrange.start >= last.end:
+            bisect.insort_left(mapped, seedrange)
+            continue
+
+        for dst, maprange in mapping_objs:
+            if seedrange.end <= maprange.start:
+                bisect.insort_left(mapped, seedrange)
+                break
+
+            if maprange.end <= seedrange.start:
+                bisect.insort_left(mapped, seedrange)
+                break
 
             if not seedrange.overlaps(maprange):
                 continue
 
             before, overlapping, after = seedrange.split(maprange)
+
             if before:
-                queue.append(before)
+                bisect.insort_left(seed_ranges, before)
 
             if overlapping:
-                offset = overlapping.start - src
-                mapped.append(SeedRange(dst + offset, dst + offset + overlapping.length))
+                offset = overlapping.start - maprange.start
+                bisect.insort_left(mapped, SeedRange(dst + offset, dst + offset + overlapping.length))
 
             if after:
-                queue.append(after)
+                bisect.insort_left(seed_ranges, after)
 
             break
         else:
-            mapped.append(seedrange)
+            bisect.insort_left(mapped, seedrange)
 
-    seed_ranges = mapped
+    seed_ranges.append(mapped[0])
 
-print(min(sr.start for sr in seed_ranges))
+    # merge ranges
+    for idx in range(1, len(mapped)):
+        next_range = mapped[idx]
+        prev_range = seed_ranges[-1]
+        if prev_range.end == next_range.start:
+            prev_range.end = next_range.end
+        else:
+            seed_ranges.append(next_range)
+
+print(seed_ranges[0].start)
