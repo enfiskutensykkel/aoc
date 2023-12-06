@@ -62,21 +62,17 @@ for group in groups[1:]:
                           for dst, src, length in mappings],
                           key=lambda x: x[1])
 
-    first, last = mapping_objs[0][1], mapping_objs[-1][1]
+    last = mapping_objs[-1][1]
 
     while len(seed_ranges) > 0:
         seedrange = seed_ranges.pop(0)
 
-        if seedrange.end <= first.start or seedrange.start >= last.end:
+        if seedrange.start >= last.end:
             bisect.insort_left(mapped, seedrange)
             continue
 
         for dst, maprange in mapping_objs:
             if seedrange.end <= maprange.start:
-                bisect.insort_left(mapped, seedrange)
-                break
-
-            if maprange.end <= seedrange.start:
                 bisect.insort_left(mapped, seedrange)
                 break
 
