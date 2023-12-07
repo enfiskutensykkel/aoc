@@ -53,7 +53,7 @@ seed_ranges = sorted([SeedRange(int(x), int(x)+int(y)) for x, y in re.findall(r"
 
 for group in groups[1:]:
     lines = group.split("\n")[1:]
-
+    print(group.split("\n")[0].split()[0])
     mapped = []
 
     mappings = [tuple(int(x) for x in re.findall("\d+", line))
