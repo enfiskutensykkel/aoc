@@ -101,9 +101,11 @@ for group in groups[1:]:
     for idx in range(1, len(mapped)):
         next_range = mapped[idx]
         prev_range = seed_ranges[-1]
-        if prev_range.end == next_range.start:
-            prev_range.end = next_range.end
-        else:
+
+        if prev_range.end < next_range.start:
             seed_ranges.append(next_range)
+
+        elif prev_range.end >= next_range.start and next_range.end > prev_range.end:
+            prev_range.end = next_range.end
 
 print(seed_ranges[0].start)
