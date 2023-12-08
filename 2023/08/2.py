@@ -15,19 +15,10 @@ for line in graph_lines.split("\n"):
     if node[-1] == "A":
         nodes.append(node)
 
-def factorization(k):
-	if k == 1:
-		return [1]
-
-	step = 2
-	lim = k // 2
-	while step <= lim:
-		if k % step == 0:
-			return factorization(k // step) + [step]
-
-		step += 1
-
-	return [k]
+def gcd(a, b):
+    while a > 0:
+        a, b = b % a, a
+    return b
 
 def num_steps(node, graph, instructions):
     steps = 0
@@ -58,17 +49,4 @@ steps = [num_steps(node, graph, instructions)[1] for node in nodes]
 
 m = max(steps)
 for s in steps:
-    print(factorization(s))
-
-
-#
-#min_common = 10000000000
-#
-#for f in factors[0]:
-#    for facs in factors[1:]:
-#        for g in facs:
-#            if f == g and f < min_common:
-#                min_common = f
-#
-#for step in steps:
-#    print(step)
+    print(gcd(m, s))
