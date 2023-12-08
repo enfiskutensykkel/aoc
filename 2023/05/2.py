@@ -48,12 +48,25 @@ class SeedRange:
 
         raise Exception("this should not happen")
 
+def find_map_range(seedrange, map_ranges, lo, hi):
+    if lo > hi:
+        return None, None
+
+    mid = (lo + hi) // 2
+    maprange = map_ranges[mid][1]
+
+    if seedrange.overlaps(maprange):
+        return map_ranges[mid]
+    elif seedrange.end <= maprange.start:
+        return find_map_range(seedrange, map_ranges, lo, mid-1)
+    else:
+        return find_map_range(seedrange, map_ranges, mid+1, hi)
 
 seed_ranges = sorted([SeedRange(int(x), int(x)+int(y)) for x, y in re.findall(r"(\d+)\s(\d+)", groups[0])])
 
 for group in groups[1:]:
     lines = group.split("\n")[1:]
-    print(group.split("\n")[0].split()[0])
+    #print(group.split("\n")[0].split()[0])
     mapped = []
 
     mappings = [tuple(int(x) for x in re.findall("\d+", line))
@@ -62,22 +75,26 @@ for group in groups[1:]:
                           for dst, src, length in mappings],
                           key=lambda x: x[1])
 
+    first = mapping_objs[0][1]
     last = mapping_objs[-1][1]
 
     while len(seed_ranges) > 0:
         seedrange = seed_ranges.pop(0)
 
-        if seedrange.start >= last.end:
+        if seedrange.start >= last.end or seedrange.end <= first.start:
             bisect.insort_left(mapped, seedrange)
             continue
 
-        for dst, maprange in mapping_objs:
-            if seedrange.end <= maprange.start:
-                bisect.insort_left(mapped, seedrange)
-                break
+        #for dst, maprange in mapping_objs:
+        #    if seedrange.end <= maprange.start:
+        #        bisect.insort_left(mapped, seedrange)
+        #        break
+        #
+        #    if not seedrange.overlaps(maprange):
+        #        continue
 
-            if not seedrange.overlaps(maprange):
-                continue
+        dst, maprange = find_map_range(seedrange, mapping_objs, 0, len(mapping_objs)-1)
+        if maprange is not None:
 
             before, overlapping, after = seedrange.split(maprange)
 
@@ -91,7 +108,7 @@ for group in groups[1:]:
             if after:
                 bisect.insort_left(seed_ranges, after)
 
-            break
+            #break
         else:
             bisect.insort_left(mapped, seedrange)
 
