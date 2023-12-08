@@ -20,6 +20,9 @@ def gcd(a, b):
         a, b = b % a, a
     return b
 
+def lcm(a, b):
+    return (a*b) // gcd(a, b)
+
 def num_steps(node, graph, instructions):
     steps = 0
 
@@ -47,6 +50,7 @@ def num_steps(node, graph, instructions):
 
 steps = [num_steps(node, graph, instructions)[1] for node in nodes]
 
-m = max(steps)
+p = 1
 for s in steps:
-    print(gcd(m, s))
+    p *= s
+
