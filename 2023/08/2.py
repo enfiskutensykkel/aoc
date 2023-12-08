@@ -2,6 +2,26 @@
 from sys import stdin
 import re
 
+def gcd(a, b):
+    while a > 0:
+        a, b = b % a, a
+    return b
+
+def gcds(*args):
+    r = args[0]
+    for i in range(1, len(args)):
+        r = gcd(r, args[i])
+        if r == 1:
+            return 1
+    return r
+
+def lcms(*args):
+    r = args[0]
+    for i in range(1, len(args)):
+        r = r * args[i] // gcd(r, args[i])
+    return r
+
+
 expr = re.compile(r"^([^\s]+) = \(([^,]+), ([^\)]+)\)$")
 
 instructions, graph_lines = stdin.read().strip().split("\n\n")
@@ -15,42 +35,21 @@ for line in graph_lines.split("\n"):
     if node[-1] == "A":
         nodes.append(node)
 
-def gcd(a, b):
-    while a > 0:
-        a, b = b % a, a
-    return b
-
-def lcm(a, b):
-    return (a*b) // gcd(a, b)
-
 def num_steps(node, graph, instructions):
     steps = 0
 
-    while node[-1] != "Z":
-        instr = instructions[steps % len(instructions)]
+    visited = set()
+
+    while True:
+        idx = steps % len(instructions)
+        if node[-1] == "Z": #and (node, idx) in visited:
+            return steps
+
+        visited.add((node, idx))
+        instr = instructions[idx]
         node = graph[node][0 if instr == "L" else 1]
         steps += 1
 
-    target = node
-
-    instr = instructions[steps % len(instructions)]
-    node = graph[node][0 if instr == "L" else 1]
-    cycle = 1
-
-    while node[-1] != "Z":
-        instr = instructions[cycle % len(instructions)]
-        node = graph[node][0 if instr == "L" else 1]
-        cycle += 1
-
-    if node != target:
-        print("multiple cycles")
-
-    return steps, cycle
-
-
-steps = [num_steps(node, graph, instructions)[1] for node in nodes]
-
-p = 1
-for s in steps:
-    p *= s
-
+steps = [num_steps(node, graph, instructions) for node in nodes]
+print(steps)
+print(lcms(*steps))
