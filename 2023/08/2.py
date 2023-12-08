@@ -7,27 +7,16 @@ def gcd(a, b):
         a, b = b % a, a
     return b
 
-def gcds(*args):
-    r = args[0]
-    for i in range(1, len(args)):
-        r = gcd(r, args[i])
-        if r == 1:
-            return 1
-    return r
-
 def lcms(*args):
     r = args[0]
     for i in range(1, len(args)):
         r = r * args[i] // gcd(r, args[i])
     return r
 
-
 expr = re.compile(r"^([^\s]+) = \(([^,]+), ([^\)]+)\)$")
-
 instructions, graph_lines = stdin.read().strip().split("\n\n")
 
 graph = {}
-
 nodes = []
 for line in graph_lines.split("\n"):
     node, left, right = expr.match(line).groups()
@@ -37,7 +26,6 @@ for line in graph_lines.split("\n"):
 
 def num_steps(node, graph, instructions):
     steps = 0
-
     visited = set()
 
     while True:
@@ -51,5 +39,4 @@ def num_steps(node, graph, instructions):
         steps += 1
 
 steps = [num_steps(node, graph, instructions) for node in nodes]
-print(steps)
 print(lcms(*steps))
