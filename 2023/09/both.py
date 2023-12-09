@@ -3,47 +3,21 @@ from sys import stdin
 
 lines = stdin.read().strip().split("\n")
 
-
-def extrapolate_fwd(seq):
+def extrapolate(seq):
     if not all(x == 0 for x in seq):
-        diffs = []
-        for i in range(1, len(seq)):
-            diffs.append(seq[i] - seq[i-1])
-
-        extrapolate_fwd(diffs)
-
-        seq.append(seq[-1] + diffs[-1])
+        diffs = [seq[i] - seq[i-1] for i in range(1, len(seq))]
+        f, b = extrapolate(diffs)
+        return seq[0] - f, seq[-1] + b
 
     else:
-        seq.append(0)
+        return 0, 0
 
-total = 0
-
+part1 = 0
+part2 = 0
 for line in lines:
-    nums = [int(x) for x in line.split()]
-    extrapolate_fwd(nums)
-    total += nums[-1]
+    a, b = extrapolate([int(x) for x in line.split()])
+    part1 += a
+    part2 += b
 
-print(total)
-
-
-def extrapolate_bkwd(seq):
-    if not all(x == 0 for x in seq):
-        diffs = []
-        for i in range(1, len(seq)):
-            diffs.append(seq[i] - seq[i-1])
-
-        extrapolate_bkwd(diffs)
-
-        seq.insert(0, seq[0] - diffs[0])
-
-    else:
-        seq.insert(0, 0)
-
-total = 0
-for line in lines:
-    nums = [int(x) for x in line.split()]
-    extrapolate_bkwd(nums)
-    total += nums[0]
-
-print(total)
+print(part1)
+print(part2)
