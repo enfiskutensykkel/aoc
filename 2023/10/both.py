@@ -122,78 +122,52 @@ def dijkstra(w, h, graph, s):
             {v: u for v, u in prev.items() if u != None})
 
 
-def flood(w, h, graph, loop, s):
-    q = [s]
+def bfs(w, h, graph, s):
+    Q = []
     visited = set()
     visited.add(s)
-    area = set()
+    Q.append(s)
 
-    squeezing = False
+    prev = {}
+    dist = {}
+    dist[s] = 0
+    prev[s] = s
 
-    while len(q) > 0:
-        u = q.pop(0)
-        x, y = (u % w), (u // w)
+    while len(Q) > 0:
+        u = Q.pop(0)
 
-        if x == 0 or y == 0 or x == w-1 or y == h-1:
-            return None
-
-        search_patterns = {"|": [(0, -1), (0, 1)],
-                           "-": [(-1, 0), (1, 0)],
-                           None: [(0, -1), (-1, 0), (1, 0), (0, 1)]}
-
-        search_pattern = search_patterns[None]
-        if u not in loop:
-            area.add(u)
-
-        elif graph[u] in search_patterns:
-            search_pattern = search_patterns[graph[u]]
-
-        for (dx, dy) in search_pattern:
-            i = x + dx
-            j = y + dy
-            v = j * w + i
-
-            if v in visited:
-                continue
-
-            if u not in loop or v not in loop:
-                q.append(v)
+        for v in neighbors(w, h, graph, u):
+            if v not in visited:
                 visited.add(v)
-                continue
+                Q.append(v)
+                dist[v] = dist[u] + 1
+                prev[v] = u
 
-            match (dx, dy, graph[u]):
-                case 0, -1, 'L':
-                    allowed_pattern = "|F"
-                case 0, -1, 'J':
-                    allowed_pattern = "|7"
-                case 0, 1, 'F':
-                    allowed_pattern = "|L"
-                case 0, 1, '7':
-                    allowed_pattern = "|J"
-                case -1, 0, 'J':
-                    allowed_pattern = "-L"
-                case -1, 0, '7':
-                    allowed_pattern = "-F"
-                case 1, 0, 'L':
-                    allowed_pattern = "-J"
-                case 1, 0, 'F':
-                    allowed_pattern = "-7"
-                case _:
-                    allowed_pattern = ""
+    return dist, prev
 
-            while 0 <= i and i < w and 0 <= j and j < h:
-                v = j * w + i
 
-                if v not in loop or not graph[v] in allowed_pattern + graph[u]:
-                    break
+def dfs(w, h, graph, s):
+    S = [s]
+    visited = set()
+    corners = []
 
-                visited.add(v)
-                q.append(v)
+    while len(S) > 0:
+        u = S.pop()
+        x, y = u % w, u // w
 
-                i += dx
-                j += dy
+        if u in visited:
+            continue
 
-    return area
+        visited.add(u)
+
+        if graph[u] in "SFJ7L":
+            corners.append(u)
+
+        for v in neighbors(w, h, graph, u):
+            S.append(v)
+
+    return corners
+
 
 # Parse tile map
 tiles = {}
@@ -206,20 +180,27 @@ for y, row in enumerate(stdin.read().strip().split("\n")):
         if tile == "S":
             start = y * w + x
 
-
 # Find the main loop
-steps, paths = dijkstra(w, h, tiles, start)
-print(max(steps.values()))
+#steps, paths = dijkstra(w, h, tiles, start)
+steps, paths = bfs(w, h, tiles, start)
+max_distance = max(steps.values())
+print(max_distance)
 
-# Find largest area enclosed by the loop
-enclosed_area = set()
-for y in range(h):
-    for x in range(w):
-        visited = flood(w, h, tiles, paths, y * w + x)
-        if visited is not None:
-            for x in visited:
-                tiles[x] = '@'
-                enclosed_area.add(x)
+def shoelace_area(w, h, points):
+    area = 0.0
 
-print_map(w, h, tiles)
-print(len(enclosed_area))
+    n = len(points)
+    j = n - 1
+
+    for i in range(n):
+        xi, yi = points[i] % w, points[i] // w
+        xj, yj = points[j] % w, points[j] // w
+        area += (xj + xi) * (yj - yi)
+        j = i
+
+    return int(abs(area / 2.0))
+
+points = dfs(w, h, tiles, start)
+area = shoelace_area(w, h, points)
+# subtract half the vertices
+print(area - max_distance + 1)
