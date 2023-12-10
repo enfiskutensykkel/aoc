@@ -8,12 +8,7 @@ max = $(strip $(if $(and $(call eq,$(call abs,$1),$1),$(call eq,$(call abs,$2),$
       $(if $(and $(if $(call eq,$(call abs,$1),$1),,-),$(if $(call eq,$(call abs,$2),$2),,-)),-$(call minN,$(call abs,$1),$(call abs,$2)),\
       $(if $(call eq,$(call abs,$1),$1),$1,$2))))
 
-min = $(strip $(if $(and $(call eq,$(call abs,$1),$1),$(call eq,$(call abs,$2),$2)),$(call minN,$1,$2),\
-      $(if $(and $(if $(call eq,$(call abs,$1),$1),,-),$(if $(call eq,$(call abs,$2),$2),,-)),-$(call maxN,$(call abs,$1),$(call abs,$2)),\
-      $(if $(call eq,$(call abs,$1),$1),$2,$1))))
-
 gt = $(filter-out $2,$(call max,$1,$2))
-gte = $(call gt,$1,$2)$(call eq,$1,$2)
 
 repeat = $(if $(call eq,$(words $3),$1),$(strip $3),$(call repeat,$1,$2,$3 $2))
 
@@ -57,3 +52,10 @@ part2 = $(call fold,add,$(call stripe,2,$(firstword $(results)) $(results)),0)
 
 .PHONY: all
 all: ; $(info $(part1)) $(info $(part2))
+
+
+#map = $(if $2,$(call map,$1,$(call left-slice,1,$2),$3,$4 $(call $1,$(firstword $2),$3,$4)),$4)
+#min = $(strip $(if $(and $(call eq,$(call abs,$1),$1),$(call eq,$(call abs,$2),$2)),$(call minN,$1,$2),\
+      $(if $(and $(if $(call eq,$(call abs,$1),$1),,-),$(if $(call eq,$(call abs,$2),$2),,-)),-$(call maxN,$(call abs,$1),$(call abs,$2)),\
+      $(if $(call eq,$(call abs,$1),$1),$2,$1))))
+#gte = $(call gt,$1,$2)$(call eq,$1,$2)
