@@ -54,8 +54,15 @@ class minheap:
         return None
 
 
+def print_map(w, h, graph):
+    for y in range(h):
+        for x in range(w):
+            print(graph[y * w + x], end="")
+        print()
+
+
 def neighbors(w, h, graph, v):
-    x, y = (v % w), (v // h)
+    x, y = (v % w), (v // w)
 
     tile = graph[v]
     checks = {'S': {(x, y-1): "|F7",
@@ -76,6 +83,7 @@ def neighbors(w, h, graph, v):
                     (x, y-1): "|F7S"}
               }[tile]
 
+
     u = []
     for (i, j), tiles in checks.items():
         if 0 <= i and i < w and 0 <= j and j < h:
@@ -83,6 +91,7 @@ def neighbors(w, h, graph, v):
                 u.append(j * w + i)
 
     return u
+
 
 def dijkstra(w, h, graph, s):
     dist = {}
@@ -93,7 +102,7 @@ def dijkstra(w, h, graph, s):
     dist[s] = 0
     prev[s] = s
     for v in range(w * h):
-        if v!= s and graph[v] != "." and len(neighbors(w, h, graph, v)) > 0:
+        if v != s and graph[v] != "." and len(neighbors(w, h, graph, v)) > 0:
             dist[v] = infinity
             prev[v] = None
 
@@ -113,6 +122,80 @@ def dijkstra(w, h, graph, s):
             {v: u for v, u in prev.items() if u != None})
 
 
+def flood(w, h, graph, loop, s):
+    q = [s]
+    visited = set()
+    visited.add(s)
+    area = set()
+
+    squeezing = False
+
+    while len(q) > 0:
+        u = q.pop(0)
+        x, y = (u % w), (u // w)
+
+        if x == 0 or y == 0 or x == w-1 or y == h-1:
+            return None
+
+        search_patterns = {"|": [(0, -1), (0, 1)],
+                           "-": [(-1, 0), (1, 0)],
+                           None: [(0, -1), (-1, 0), (1, 0), (0, 1)]}
+
+        search_pattern = search_patterns[None]
+        if u not in loop:
+            area.add(u)
+
+        elif graph[u] in search_patterns:
+            search_pattern = search_patterns[graph[u]]
+
+        for (dx, dy) in search_pattern:
+            i = x + dx
+            j = y + dy
+            v = j * w + i
+
+            if v in visited:
+                continue
+
+            if u not in loop or v not in loop:
+                q.append(v)
+                visited.add(v)
+                continue
+
+            match (dx, dy, graph[u]):
+                case 0, -1, 'L':
+                    allowed_pattern = "|F"
+                case 0, -1, 'J':
+                    allowed_pattern = "|7"
+                case 0, 1, 'F':
+                    allowed_pattern = "|L"
+                case 0, 1, '7':
+                    allowed_pattern = "|J"
+                case -1, 0, 'J':
+                    allowed_pattern = "-L"
+                case -1, 0, '7':
+                    allowed_pattern = "-F"
+                case 1, 0, 'L':
+                    allowed_pattern = "-J"
+                case 1, 0, 'F':
+                    allowed_pattern = "-7"
+                case _:
+                    allowed_pattern = ""
+
+            while 0 <= i and i < w and 0 <= j and j < h:
+                v = j * w + i
+
+                if v not in loop or not graph[v] in allowed_pattern + graph[u]:
+                    break
+
+                visited.add(v)
+                q.append(v)
+
+                i += dx
+                j += dy
+
+    return area
+
+# Parse tile map
 tiles = {}
 start = -1
 for y, row in enumerate(stdin.read().strip().split("\n")):
@@ -123,5 +206,20 @@ for y, row in enumerate(stdin.read().strip().split("\n")):
         if tile == "S":
             start = y * w + x
 
+
+# Find the main loop
 steps, paths = dijkstra(w, h, tiles, start)
 print(max(steps.values()))
+
+# Find largest area enclosed by the loop
+enclosed_area = set()
+for y in range(h):
+    for x in range(w):
+        visited = flood(w, h, tiles, paths, y * w + x)
+        if visited is not None:
+            for x in visited:
+                tiles[x] = '@'
+                enclosed_area.add(x)
+
+print_map(w, h, tiles)
+print(len(enclosed_area))
