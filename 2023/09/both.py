@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 from sys import stdin
 
-lines = stdin.read().strip().split("\n")
-
 def extrapolate(seq):
     if not all(x == 0 for x in seq):
         diffs = [seq[i] - seq[i-1] for i in range(1, len(seq))]
@@ -14,10 +12,12 @@ def extrapolate(seq):
 
 part1 = 0
 part2 = 0
+
+lines = stdin.read().strip().split("\n")
 for line in lines:
     a, b = extrapolate([int(x) for x in line.split()])
-    part1 += a
-    part2 += b
+    part2 += a
+    part1 += b
 
 print(part1)
 print(part2)
