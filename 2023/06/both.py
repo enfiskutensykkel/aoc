@@ -14,12 +14,6 @@ import sys
 #0 6 a c c a 6 0
 
 def ways(time, distance):
-#    ways = 0
-#    for i in range(1, time):
-#        d = i * (time - i)
-#        if d > distance:
-#            ways += 1
-#    return ways
     h = time // 2
     l = 1
     while l < h:
