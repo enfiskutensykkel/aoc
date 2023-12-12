@@ -53,9 +53,18 @@ def permutate(group, counts, start, dmg, op):
 s = 0
 for row in stdin.read().strip().split("\n"):
     group, counts = row.split()
+
+    #group = "?".join([group] * 5)
+    #counts = ",".join([counts] * 5)
+
     counts = [int(x) for x in counts.split(",")]
 
-    l = permutate(list(group), counts, 0, sum(counts), len(group) - sum(counts))
+    missing_dmg = sum(counts) - (len(group) - sum(len(x) for x in group.split("#")))
+    missing_op = len(group) - sum(counts) - (len(group) - sum(len(x) for x in group.split(".")))
+
+    l = permutate(list(group), counts, 0,
+                  missing_dmg,
+                  missing_op)
     s += l
 
 print(s)
