@@ -30,8 +30,9 @@ def permutations(group, counts, start, idx, matches):
         return 1
 
     key = (group[start:], counts[idx:])
-    if key in matches:
-        return matches[key]
+    r = matches.get(key, -1)
+    if r >= 0:
+        return r
 
     while start < len(group) and group[start] == ".":
         start += 1
