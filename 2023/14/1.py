@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 from sys import stdin
 
-
 rows = []
-
 loads = []
 
 for y, row in enumerate(stdin.read().strip().splitlines()):
