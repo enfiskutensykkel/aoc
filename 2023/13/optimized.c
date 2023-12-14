@@ -35,7 +35,7 @@ void rotate(size_t width, size_t size)
     size_t height = size / width;
     for (size_t r = 0; r < height; ++r) {
         for (size_t c = 0; c < width; ++c) {
-            if (test_bit(pattern, r * width + (width - c - 1))) {
+            if (test_bit(pattern, r * width + c)) { // (width - c - 1))) {
                 set_bit(rotated, c * height + r);
             } else {
                 clear_bit(rotated, c * height + r);
