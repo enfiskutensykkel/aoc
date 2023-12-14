@@ -4,7 +4,7 @@ from sys import stdin
 rows = []
 loads = []
 
-for y, row in enumerate(stdin.read().strip().splitlines()):
+for row in stdin.read().strip().splitlines():
 
     loads.insert(0, 0)
     rows.insert(0, set())
