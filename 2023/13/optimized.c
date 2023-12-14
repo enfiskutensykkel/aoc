@@ -4,9 +4,12 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <stdbool.h>
-#include <string.h>
 
 #define MAX_MIRROR_SIZE     ((1UL << 20) / sizeof(uint64_t))
+
+uint64_t pattern[MAX_MIRROR_SIZE];
+
+uint64_t rotated[MAX_MIRROR_SIZE];
 
 
 static inline void set_bit(uint64_t *bitmap, size_t i)
@@ -27,24 +30,18 @@ static inline void clear_bit(uint64_t *bitmap, size_t i)
 }
 
 
-void rotate(size_t width, size_t size, uint64_t *pattern)
+void rotate(size_t width, size_t size)
 {
-    uint64_t *rotated = calloc(size, sizeof(uint64_t));
-    if (rotated == NULL) {
-        return;
-    }
-
     size_t height = size / width;
     for (size_t r = 0; r < height; ++r) {
         for (size_t c = 0; c < width; ++c) {
             if (test_bit(pattern, r * width + (width - c - 1))) {
                 set_bit(rotated, c * height + r);
+            } else {
+                clear_bit(rotated, c * height + r);
             }
         }
     }
-
-    memcpy(pattern, rotated, size*sizeof(uint64_t));
-    free(rotated);
 }
 
 
@@ -84,31 +81,21 @@ not_reflecting:
 }
 
 
-void do_stuff(size_t width, size_t size, uint64_t *pattern, size_t *part1, size_t *part2)
+size_t do_stuff(size_t width, size_t size, bool smudge)
 {
-    bool rotated = false;
+    size_t total = 0;
+    ssize_t line = 0;
 
-    ssize_t line1 = reflection(width, size, pattern, false);
-    ssize_t line2 = reflection(width, size, pattern, true);
-            
-    if (line1 == -1) {
-        rotated = true;
-        rotate(width, size, pattern);
-        line1 = reflection(size / width, size, pattern, false);
-        *part1 += (line1 + 1) * 100;
+    line = reflection(width, size, pattern, smudge);
+
+    if (line == -1) {
+        line = reflection(size / width, size, rotated, smudge);
+        total = (line + 1) * 100;
     } else {
-        *part1 += line1 + 1;
+        total = line + 1;
     }
 
-    if (line2 == -1) {
-        if (!rotated) {
-            rotate(width, size, pattern);
-        }
-        line2 = reflection(size / width, size, pattern, true);
-        *part2 += (line2 + 1) * 100;
-    } else {
-        *part2 += line2 + 1;
-    }
+    return total;
 }
 
 
@@ -119,21 +106,16 @@ int main()
     ssize_t len;
 
     ssize_t w = 0;
-    uint64_t *pattern = NULL;
     size_t idx = 0;
-
-    pattern = calloc(MAX_MIRROR_SIZE, sizeof(uint64_t));
-    if (pattern == NULL) {
-        return 1;
-    }
 
     size_t part1 = 0;
     size_t part2 = 0;
 
     while ((len = getline(&line, &sz, stdin)) != -1) {
         if (len == 1) {
-
-            do_stuff(w, idx, pattern, &part1, &part2);
+            rotate(w, idx);
+            part1 += do_stuff(w, idx, false);
+            part2 += do_stuff(w, idx, true);
 
             idx = 0;
             w = 0;
@@ -158,12 +140,13 @@ int main()
         }
     }
 
-    do_stuff(w, idx, pattern, &part1, &part2);
+    rotate(w, idx);
+    part1 += do_stuff(w, idx, false);
+    part2 += do_stuff(w, idx, true);
 
     printf("%zu\n", part1);
     printf("%zu\n", part2);
 
-    free(pattern);
     free(line);
     return 0;
 }
