@@ -28,7 +28,7 @@ for i in range(256):
     boxes.append(([], []))
 
 
-for i, sequence in enumerate(sequences):
+for sequence in sequences:
     key = None
     focal_length = None
     if sequence[-1] == "-":
