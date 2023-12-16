@@ -83,5 +83,22 @@ data = stdin.read().strip()
 width = data.index('\n')
 grid = [c for r in data.splitlines() for c in r]
 
+print(bfs(width, grid, 0, 'E'))
 
-print(bfs(width, grid, 3, 'S'))
+height = len(grid) // width
+max_energized = 0
+for i in range(width):
+    n = bfs(width, grid, i, 'S')
+    max_energized = max(max_energized, n)
+
+    m = bfs(width, grid, (height - 1) * width + i, 'N')
+    max_energized = max(max_energized, m)
+
+for j in range(height):
+    n = bfs(width, grid, width * j, 'E')
+    max_energized = max(max_energized, n)
+
+    m = bfs(width, grid, (width * j) + (width - 1), 'W')
+    max_energized = max(max_energized, m)
+
+print(max_energized)
